@@ -1,30 +1,25 @@
-import React, {PureComponent} from 'react';
-import {AppRegistry, StyleSheet, StatusBar} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {StyleSheet, StatusBar} from 'react-native';
 import {GameEngine} from 'react-native-game-engine';
-import {Finger} from './src/renderers';
-import {MoveFinger} from './src/system';
+import entities from './src/Entities';
+import Physics from './physics';
 
-export default class BestGameEver extends PureComponent {
-  constructor() {
-    super();
-  }
+export default function BestGameEver(): JSX.Element {
+  const [running, setRunning] = useState(false);
 
-  render() {
-    return (
-      <GameEngine
-        style={styles.container}
-        systems={[MoveFinger]}
-        entities={{
-          1: {position: [40, 200], renderer: <Finger />}, //-- Notice that each entity has a unique id (required)
-          2: {position: [100, 200], renderer: <Finger />}, //-- and a renderer property (optional). If no renderer
-          3: {position: [160, 200], renderer: <Finger />}, //-- is supplied with the entity - it won't get displayed.
-          4: {position: [220, 200], renderer: <Finger />},
-          5: {position: [280, 200], renderer: <Finger />},
-        }}>
-        <StatusBar hidden={true} />
-      </GameEngine>
-    );
-  }
+  useEffect(() => {
+    setRunning(true);
+  }, []);
+
+  return (
+    <GameEngine
+      style={styles.container}
+      entities={entities()}
+      systems={[Physics]}
+      running={running}>
+      <StatusBar hidden={true} />
+    </GameEngine>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -33,5 +28,3 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
   },
 });
-
-AppRegistry.registerComponent('BestGameEver', () => BestGameEver);
