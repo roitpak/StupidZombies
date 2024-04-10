@@ -6,16 +6,27 @@ import Physics from './physics';
 
 export default function BestGameEver(): JSX.Element {
   const [running, setRunning] = useState(false);
-
+  const [gameEngine, setGameEngine] = useState<GameEngine | null>(null);
   useEffect(() => {
     setRunning(true);
   }, []);
 
   return (
     <GameEngine
+      ref={(ref: GameEngine) => setGameEngine(ref)}
       style={styles.container}
       entities={entities()}
       systems={[Physics]}
+      onEvent={(e: Event) => {
+        switch (e.type) {
+          case 'game_over':
+            setRunning(false);
+            gameEngine?.stop();
+            break;
+          default:
+            break;
+        }
+      }}
       running={running}>
       <StatusBar hidden={true} />
     </GameEngine>

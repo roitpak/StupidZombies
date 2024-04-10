@@ -3,6 +3,7 @@ import Hero from '../Components/Hero';
 import Floor from '../Components/Floor';
 import Constants from '../Constants';
 import Zombies from '../Components/Zombies';
+import Bullet from '../Components/Bullet';
 
 const restart = () => {
   let engine = Matter.Engine.create({enableSleeping: false});
@@ -19,6 +20,12 @@ const restart = () => {
       color: 'green',
       pos: {x: 50, y: 300},
       size: {height: 40, width: 40},
+    }),
+    Bullet: Bullet({
+      world: world,
+      color: 'red',
+      size: {height: 5, width: 5},
+      pos: {x: 70, y: 300},
     }),
     Zombies: Zombies({
       world: world,

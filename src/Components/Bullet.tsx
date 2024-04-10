@@ -41,7 +41,7 @@ export default ({world, color, pos, size}: BulletEntityParams) => {
     pos.y,
     size.width,
     size.height,
-    {label: 'Bullet'},
+    {label: 'Bullet', isStatic: true},
   );
   Matter.World.add(world, initialBullet);
 
