@@ -20,6 +20,7 @@ export default function BestGameEver(): JSX.Element {
       onEvent={(e: Event) => {
         switch (e.type) {
           case 'game_over':
+            // console.log('FINISHED-------->');
             setRunning(false);
             gameEngine?.stop();
             break;

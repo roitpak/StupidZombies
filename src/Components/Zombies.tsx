@@ -41,7 +41,10 @@ export default ({world, color, pos, size}: ZombiesEntityParams) => {
     pos.y,
     size.width,
     size.height,
-    {label: 'Zombies'},
+    {
+      label: 'Zombies',
+      isStatic: true,
+    },
   );
   Matter.World.add(world, initialZombies);
 

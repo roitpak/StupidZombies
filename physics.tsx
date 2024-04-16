@@ -3,7 +3,10 @@ import Matter from 'matter-js';
 interface Entities {
   Zombies: {body: any; color: string};
   Bullet: {body: any; color: string};
-  Floor: {body: any; color: string};
+  FloorBottom: {body: any; color: string};
+  FloorTop: {body: any; color: string};
+  FloorRight: {body: any; color: string};
+  FloorLeft: {body: any; color: string};
   Hero: {body: any; color: string};
   physics: {
     engine: Matter.Engine;
@@ -21,30 +24,82 @@ interface PhysicsProps {
   dispatch: any;
 }
 
+const BOUNCES = 5;
+
+let translate = {x: 0, y: 0};
+let currentBounce = 0;
+
+let isFirstCall = true;
+function setTranslate(value: {x: number; y: number}) {
+  if (isFirstCall) {
+    // Do something with the argument for the first call
+    translate = value;
+    isFirstCall = false;
+    currentBounce++;
+    // Set a timeout to reset isFirstCall after a delay
+    setTimeout(() => {
+      isFirstCall = true;
+    }, 100); // Adjust the delay as needed
+  }
+}
+
 const Physics = (
   entities: Entities,
   {touches, time, dispatch}: PhysicsProps,
 ): Entities => {
   let engine = entities.physics.engine;
-  let translate = {x: 0, y: 0};
   touches
     .filter(t => t.type === 'press')
     .forEach(t => {
-      console.log('Touch', t);
-      console.log('Entity', entities?.Zombies?.body);
       const angleRadians = Math.atan2(
         t.event.locationY - entities.Bullet.body.position.y,
         t.event.locationX - entities.Bullet.body.position.x,
       );
       translate = {
-        x: Math.cos(angleRadians),
-        y: Math.sin(angleRadians),
+        x: Math.cos(angleRadians) * 7,
+        y: Math.sin(angleRadians) * 7,
       };
-      Matter.Body.translate(entities.Bullet.body, translate);
     });
-  Matter.Events.on(engine, 'collisionStart', e => {
-    // console.log('Collision', e);
-    // dispatch({type: 'game_over'});
+  Matter.Events.on(engine, 'collisionStart', event => {
+    event.pairs.forEach(pair => {
+      const {bodyA, bodyB} = pair;
+      if (bodyA === entities.Bullet?.body && bodyB === entities.Zombies?.body) {
+        // console.log('Collision between Bulllet and Zombies');
+      }
+      if (
+        bodyA === entities.Bullet?.body &&
+        (bodyB === entities.FloorTop?.body ||
+          bodyB === entities.FloorBottom?.body ||
+          bodyB === entities.FloorLeft?.body ||
+          bodyB === entities.FloorRight?.body)
+      ) {
+        console.log(currentBounce, BOUNCES);
+        if (currentBounce === BOUNCES) {
+          dispatch({type: 'game_over'});
+        }
+        let tempTranslate;
+        switch (bodyB) {
+          case entities.FloorTop?.body || entities.FloorBottom?.body:
+            tempTranslate = translate;
+            setTranslate({x: tempTranslate.x, y: -tempTranslate.y});
+            break;
+          case entities.FloorBottom?.body:
+            tempTranslate = translate;
+            setTranslate({x: tempTranslate.x, y: -tempTranslate.y});
+            break;
+          case entities.FloorLeft?.body || entities.FloorRight?.body:
+            tempTranslate = translate;
+            setTranslate({x: -tempTranslate.x, y: tempTranslate.y});
+            break;
+          case entities.FloorRight?.body:
+            tempTranslate = translate;
+            setTranslate({x: -tempTranslate.x, y: tempTranslate.y});
+            break;
+          default:
+            break;
+        }
+      }
+    });
   });
   Matter.Engine.update(engine, time.delta);
   Matter.Body.translate(entities.Bullet.body, translate);

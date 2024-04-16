@@ -18,9 +18,7 @@ const Hero: React.FC<HeroProps> = (props: any) => {
 
   const styles = StyleSheet.create({
     container: {
-      borderWidth: 1,
-      borderColor: color,
-      borderStyle: 'solid',
+      backgroundColor: color || 'pink',
       position: 'absolute',
       left: xBody,
       top: yBody,
@@ -45,7 +43,7 @@ export default ({world, color, pos, size}: HeroEntityParams) => {
     pos.y,
     size.width,
     size.height,
-    {label: 'Hero'},
+    {label: 'Hero', isStatic: true},
   );
   Matter.World.add(world, initialHero);
 
