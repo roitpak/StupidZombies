@@ -1,6 +1,7 @@
 import Matter from 'matter-js';
-import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Image, StyleSheet, View} from 'react-native';
+import heroImgs from '../assets/hero';
 
 interface HeroProps {
   body: Matter.Body;
@@ -25,9 +26,31 @@ const Hero: React.FC<HeroProps> = (props: any) => {
       width: widthBody,
       height: heightBody,
     },
+    image: {
+      position: 'absolute',
+      top: 0,
+      right: -100 / 2,
+      width: 100,
+      height: heightBody,
+      resizeMode: 'contain',
+    },
   });
 
-  return <View style={styles.container} />;
+  const [currentIndex, setCurrentImage] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImage(prevIndex => (prevIndex + 1) % heroImgs.length);
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <View style={[styles.container, {backgroundColor: color || 'pink'}]}>
+      <Image source={heroImgs[currentIndex]} style={styles.image} />
+    </View>
+  );
 };
 
 interface HeroEntityParams {

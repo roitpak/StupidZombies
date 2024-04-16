@@ -1,41 +1,98 @@
 import Matter from 'matter-js';
-import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Image, StyleSheet, View} from 'react-native';
+import zombiesAppearImgs from '../assets/zombies/appear';
+import zombieDieImgs from '../assets/zombies/die';
 
 interface ZombiesProps {
   body: Matter.Body;
-  color: string;
+  dead?: boolean;
 }
 
-const Zombies: React.FC<ZombiesProps> = (props: any) => {
-  const widthBody = props.body.bounds.max.x - props.body.bounds.min.x;
-  const heightBody = props.body.bounds.max.y - props.body.bounds.min.y;
+const Zombies: React.FC<ZombiesProps> = ({body, dead}) => {
+  const widthBody = body.bounds.max.x - body.bounds.min.x;
+  const heightBody = body.bounds.max.y - body.bounds.min.y;
 
-  const xBody = props.body.position.x - widthBody / 2;
-  const yBody = props.body.position.y - heightBody / 2;
+  const xBody = body.position.x - widthBody / 2;
+  const yBody = body.position.y - heightBody / 2;
+
+  const [currentIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex(
+        prevIndex => prevIndex + (1 % zombiesAppearImgs.length),
+      );
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (dead) {
+      setCurrentImageIndex(0);
+      interval = setInterval(() => {
+        setCurrentImageIndex(
+          prevIndex => prevIndex + (1 % zombieDieImgs.length),
+        );
+      }, 100);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [dead]);
 
   const styles = StyleSheet.create({
     container: {
-      backgroundColor: props.color || 'red',
       position: 'absolute',
       left: xBody,
       top: yBody,
       width: widthBody,
       height: heightBody,
     },
+    zombieAlive: {
+      position: 'absolute',
+      top: 0,
+      left: -70 / 2,
+      width: 70,
+      height: heightBody,
+      resizeMode: 'contain',
+    },
+    zombieDie: {
+      position: 'absolute',
+      top: 0,
+      left: -100 / 2,
+      width: 120,
+      height: heightBody,
+      resizeMode: 'contain',
+    },
   });
 
-  return <View style={styles.container} />;
+  return (
+    <View style={styles.container}>
+      <Image
+        source={
+          dead ? zombieDieImgs[currentIndex] : zombiesAppearImgs[currentIndex]
+        }
+        style={dead ? styles.zombieDie : styles.zombieAlive}
+      />
+    </View>
+  );
 };
 
 interface ZombiesEntityParams {
   world: Matter.World;
-  color: string;
   pos: {x: number; y: number};
   size: {width: number; height: number};
+  dead?: boolean;
 }
 
-export default ({world, color, pos, size}: ZombiesEntityParams) => {
+export default ({world, pos, size, dead}: ZombiesEntityParams) => {
   const initialZombies = Matter.Bodies.rectangle(
     pos.x,
     pos.y,
@@ -50,7 +107,7 @@ export default ({world, color, pos, size}: ZombiesEntityParams) => {
 
   return {
     body: initialZombies,
-    color,
-    renderer: <Zombies body={initialZombies} color={color} />,
+    dead,
+    renderer: <Zombies body={initialZombies} dead={dead} />,
   };
 };

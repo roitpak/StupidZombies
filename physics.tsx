@@ -1,7 +1,7 @@
 import Matter from 'matter-js';
 
 interface Entities {
-  Zombies: {body: any; color: string};
+  Zombies: {body: any; color: string; dead: boolean};
   Bullet: {body: any; color: string};
   FloorBottom: {body: any; color: string};
   FloorTop: {body: any; color: string};
@@ -28,6 +28,7 @@ const BOUNCES = 5;
 
 let translate = {x: 0, y: 0};
 let currentBounce = 0;
+let hitZombies = [];
 
 let isFirstCall = true;
 function setTranslate(value: {x: number; y: number}) {
@@ -64,7 +65,9 @@ const Physics = (
     event.pairs.forEach(pair => {
       const {bodyA, bodyB} = pair;
       if (bodyA === entities.Bullet?.body && bodyB === entities.Zombies?.body) {
-        // console.log('Collision between Bulllet and Zombies');
+        dispatch({type: 'win'});
+        hitZombies.push(entities.Zombies?.body.label);
+        entities.Zombies.dead = true;
       }
       if (
         bodyA === entities.Bullet?.body &&
@@ -73,7 +76,6 @@ const Physics = (
           bodyB === entities.FloorLeft?.body ||
           bodyB === entities.FloorRight?.body)
       ) {
-        console.log(currentBounce, BOUNCES);
         if (currentBounce === BOUNCES) {
           dispatch({type: 'game_over'});
         }
