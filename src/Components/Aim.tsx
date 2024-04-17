@@ -2,17 +2,12 @@ import Matter from 'matter-js';
 import React from 'react';
 import {Image, StyleSheet, View} from 'react-native';
 
-interface BulletProps {
+interface AimProps {
   body: Matter.Body;
   moving: boolean;
-  directionAngle: number;
 }
 
-const Bullet: React.FC<BulletProps> = ({
-  body,
-  moving = false,
-  directionAngle,
-}: BulletProps) => {
+const Aim: React.FC<AimProps> = ({body, moving = false}: AimProps) => {
   const widthBody = body.bounds.max.x - body.bounds.min.x;
   const heightBody = body.bounds.max.y - body.bounds.min.y;
 
@@ -24,66 +19,55 @@ const Bullet: React.FC<BulletProps> = ({
       position: 'absolute',
       left: xBody,
       top: yBody,
-      backgroundColor: 'yellow',
+      width: widthBody,
+      height: heightBody,
     },
-    bulletImage: {
+    aimImage: {
       height: heightBody,
       width: widthBody,
       resizeMode: 'contain',
       position: 'absolute',
-      top: -widthBody / 8,
-      right: -heightBody / 2,
-      transform: [{rotate: `${directionAngle}deg`}],
+      top: -widthBody / 4,
+      left: heightBody / 6,
+      tintColor: 'black',
     },
   });
 
   return (
     <View style={styles.container}>
-      {/* {console.log(directionAngle)} */}
       {moving && (
         <Image
-          source={require('../assets/gun/bullet.png')}
-          style={styles.bulletImage}
+          source={require('../assets/gun/aim.png')}
+          style={styles.aimImage}
         />
       )}
     </View>
   );
 };
 
-interface BulletEntityParams {
+interface AimEntityParams {
   world: Matter.World;
   pos: {x: number; y: number};
   size: {width: number; height: number};
   moving: boolean;
-  directionAngle: number;
 }
 
-export default ({
-  world,
-  pos,
-  size,
-  moving,
-  directionAngle,
-}: BulletEntityParams) => {
-  const initialBullet = Matter.Bodies.rectangle(
+export default ({world, pos, size, moving}: AimEntityParams) => {
+  const initialAim = Matter.Bodies.rectangle(
     pos.x,
     pos.y,
     size.width,
     size.height,
     {
-      label: 'Bullet',
+      label: 'Aim',
+      isStatic: true,
+      isSensor: false,
     },
   );
-  Matter.World.add(world, initialBullet);
+  Matter.World.add(world, initialAim);
 
   return {
-    body: initialBullet,
-    renderer: (
-      <Bullet
-        moving={moving}
-        directionAngle={directionAngle}
-        body={initialBullet}
-      />
-    ),
+    body: initialAim,
+    renderer: <Aim moving={moving} body={initialAim} />,
   };
 };

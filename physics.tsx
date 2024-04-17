@@ -4,6 +4,7 @@ interface Entities {
   Zombies: {body: any; color: string; dead: boolean};
   Bullet: {body: any; color: string; moving: boolean; directionAngle: number};
   Gun: {body: any; color: string; moving: boolean; directionAngle: number};
+  Aim: {body: any; color: string; moving: boolean};
   FloorBottom: {body: any; color: string};
   FloorTop: {body: any; color: string};
   FloorRight: {body: any; color: string};
@@ -67,6 +68,7 @@ const Physics = (
         entities,
       );
       entities.Gun.moving = false;
+      entities.Aim.moving = false;
     });
   touches
     .filter(t => t.type === 'start')
@@ -77,6 +79,9 @@ const Physics = (
       );
       entities.Gun.directionAngle = angleRadians * (180 / Math.PI);
       entities.Gun.moving = true;
+      entities.Aim.moving = true;
+      entities.Aim.body.position.y = t.event.locationY;
+      entities.Aim.body.position.x = t.event.locationX;
     });
   touches
     .filter(t => t.type === 'move')
@@ -87,6 +92,9 @@ const Physics = (
       );
       entities.Gun.directionAngle = angleRadians * (180 / Math.PI);
       entities.Gun.moving = true;
+      entities.Aim.moving = true;
+      entities.Aim.body.position.y = t.event.locationY;
+      entities.Aim.body.position.x = t.event.locationX;
     });
   Matter.Events.on(engine, 'collisionStart', event => {
     event.pairs.forEach(pair => {
@@ -109,7 +117,6 @@ const Physics = (
           entities.Bullet.moving = false;
         }
         let tempTranslate;
-        let angleRad = 0;
         switch (bodyB) {
           case entities.FloorTop?.body || entities.FloorBottom?.body:
             tempTranslate = translate;
