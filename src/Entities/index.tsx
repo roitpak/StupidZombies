@@ -1,7 +1,7 @@
 import Matter from 'matter-js';
 import Hero from '../Components/Hero';
 import Floor from '../Components/Floor';
-import Constants from '../Constants';
+import Constants from '../helpers/Constants';
 import Zombies from '../Components/Zombies';
 import Bullet from '../Components/Bullet';
 import Gun from '../Components/Gun';
@@ -20,7 +20,7 @@ const entities = () => {
     Hero: Hero({
       world: world,
       pos: {x: 70, y: 320},
-      size: {height: 100, width: 1},
+      size: {height: 100, width: 100},
     }),
     Gun: Gun({
       world: world,
@@ -45,7 +45,7 @@ const entities = () => {
     Zombies: Zombies({
       world: world,
       pos: {x: 700, y: 300},
-      size: {height: 100, width: 1},
+      size: {height: 100, width: 70},
     }),
     FloorBottom: Floor({
       world: world,

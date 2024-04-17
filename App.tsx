@@ -1,70 +1,26 @@
-import React, {useEffect, useState} from 'react';
-import {StyleSheet, StatusBar, Modal, Text, View} from 'react-native';
-import {GameEngine} from 'react-native-game-engine';
-import entities from './src/Entities';
-import Physics from './physics';
+import * as React from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import GameScreen from './src/screens/GameScreen';
+import {screens} from './src/screens/screens';
+import IntroScreen from './src/screens/IntroScreen';
+import levelsScreen from './src/screens/LevelsScreen';
 
-export default function BestGameEver(): JSX.Element {
-  const [running, setRunning] = useState(false);
-  const [win, setWin] = useState(0);
-  const [gameEngine, setGameEngine] = useState<GameEngine | null>(null);
-  useEffect(() => {
-    setRunning(true);
-  }, []);
+const Stack = createNativeStackNavigator();
 
-  const returnModalText = () => {
-    if (win === -1) {
-      return 'Game over!';
-    }
-    if (win === 1) {
-      return 'You win!';
-    }
-  };
-
+function App() {
   return (
-    <GameEngine
-      ref={(ref: GameEngine) => setGameEngine(ref)}
-      style={styles.container}
-      entities={entities()}
-      systems={[Physics]}
-      onEvent={(e: Event) => {
-        switch (e.type) {
-          case 'game_over':
-            // console.log('FINISHED-------->');
-            setWin(-1);
-            setRunning(false);
-            break;
-          case 'win':
-            // console.log('FINISHED-------->');
-            setWin(1);
-            setRunning(false);
-            break;
-          default:
-            break;
-        }
-      }}
-      running={running}>
-      <StatusBar hidden={true} />
-      <Modal
-        supportedOrientations={['landscape']}
-        transparent={true}
-        visible={win !== 0}>
-        <View style={styles.modalView}>
-          <Text>{returnModalText()} </Text>
-        </View>
-      </Modal>
-    </GameEngine>
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}>
+        <Stack.Screen name={screens.introScreen} component={IntroScreen} />
+        <Stack.Screen name={screens.levelsScreen} component={levelsScreen} />
+        <Stack.Screen name={screens.gameScreen} component={GameScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFF',
-  },
-  modalView: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
