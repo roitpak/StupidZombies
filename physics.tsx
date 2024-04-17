@@ -3,6 +3,7 @@ import Matter from 'matter-js';
 interface Entities {
   Zombies: {body: any; color: string; dead: boolean};
   Bullet: {body: any; color: string; moving: boolean; directionAngle: number};
+  Gun: {body: any; color: string; moving: boolean; directionAngle: number};
   FloorBottom: {body: any; color: string};
   FloorTop: {body: any; color: string};
   FloorRight: {body: any; color: string};
@@ -31,6 +32,7 @@ let currentBounce = 0;
 let hitZombies = [];
 
 let isFirstCall = true;
+
 function updateMovement(value: {x: number; y: number}, entities: Entities) {
   if (isFirstCall) {
     translate = value;
@@ -38,6 +40,7 @@ function updateMovement(value: {x: number; y: number}, entities: Entities) {
     currentBounce++;
     const angleRad = Math.atan2(value.y, value.x);
     entities.Bullet.directionAngle = angleRad * (180 / Math.PI);
+    entities.Bullet.moving = true;
     setTimeout(() => {
       isFirstCall = true;
     }, 100);
@@ -50,19 +53,40 @@ const Physics = (
 ): Entities => {
   let engine = entities.physics.engine;
   touches
-    .filter(t => t.type === 'press')
+    .filter(t => t.type === 'end')
     .forEach(t => {
-      console.log(t);
       const angleRadians = Math.atan2(
         t.event.locationY - entities.Bullet.body.position.y,
         t.event.locationX - entities.Bullet.body.position.x,
       );
-      translate = {
-        x: Math.cos(angleRadians) * 7,
-        y: Math.sin(angleRadians) * 7,
-      };
-      entities.Bullet.directionAngle = angleRadians * (180 / Math.PI);
-      entities.Bullet.moving = true;
+      updateMovement(
+        {
+          x: Math.cos(angleRadians) * 7,
+          y: Math.sin(angleRadians) * 7,
+        },
+        entities,
+      );
+      entities.Gun.moving = false;
+    });
+  touches
+    .filter(t => t.type === 'start')
+    .forEach(t => {
+      const angleRadians = Math.atan2(
+        t.event.locationY - entities.Bullet.body.position.y,
+        t.event.locationX - entities.Bullet.body.position.x,
+      );
+      entities.Gun.directionAngle = angleRadians * (180 / Math.PI);
+      entities.Gun.moving = true;
+    });
+  touches
+    .filter(t => t.type === 'move')
+    .forEach(t => {
+      const angleRadians = Math.atan2(
+        t.event.locationY - entities.Bullet.body.position.y,
+        t.event.locationX - entities.Bullet.body.position.x,
+      );
+      entities.Gun.directionAngle = angleRadians * (180 / Math.PI);
+      entities.Gun.moving = true;
     });
   Matter.Events.on(engine, 'collisionStart', event => {
     event.pairs.forEach(pair => {

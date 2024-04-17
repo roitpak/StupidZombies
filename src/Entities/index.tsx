@@ -4,6 +4,7 @@ import Floor from '../Components/Floor';
 import Constants from '../Constants';
 import Zombies from '../Components/Zombies';
 import Bullet from '../Components/Bullet';
+import Gun from '../Components/Gun';
 
 const entities = () => {
   let engine = Matter.Engine.create({enableSleeping: false});
@@ -20,11 +21,19 @@ const entities = () => {
       pos: {x: 70, y: 320},
       size: {height: 100, width: 1},
     }),
+    Gun: Gun({
+      world: world,
+      size: {height: 30, width: 50},
+      pos: {x: 80, y: 350},
+      moving: false,
+      directionAngle: 0,
+    }),
     Bullet: Bullet({
       world: world,
-      color: 'red',
-      size: {height: 5, width: 5},
-      pos: {x: 100, y: 300},
+      size: {height: 25, width: 25},
+      pos: {x: 100, y: 330},
+      moving: false,
+      directionAngle: 0,
     }),
     Zombies: Zombies({
       world: world,

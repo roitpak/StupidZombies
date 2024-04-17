@@ -2,17 +2,17 @@ import Matter from 'matter-js';
 import React from 'react';
 import {Image, StyleSheet, View} from 'react-native';
 
-interface BulletProps {
+interface GunProps {
   body: Matter.Body;
   moving: boolean;
   directionAngle: number;
 }
 
-const Bullet: React.FC<BulletProps> = ({
+const Gun: React.FC<GunProps> = ({
   body,
   moving = false,
   directionAngle,
-}: BulletProps) => {
+}: GunProps) => {
   const widthBody = body.bounds.max.x - body.bounds.min.x;
   const heightBody = body.bounds.max.y - body.bounds.min.y;
 
@@ -27,31 +27,30 @@ const Bullet: React.FC<BulletProps> = ({
       width: widthBody,
       height: heightBody,
     },
-    bulletImage: {
+    GunImage: {
       height: heightBody,
       width: widthBody,
       resizeMode: 'contain',
       position: 'absolute',
       top: -widthBody / 2,
-      right: -heightBody / 2,
+      left: heightBody / 6,
       transform: [{rotate: `${directionAngle}deg`}],
     },
   });
 
   return (
     <View style={styles.container}>
-      {/* {console.log(directionAngle)} */}
       {moving && (
         <Image
-          source={require('../assets/gun/bullet.png')}
-          style={styles.bulletImage}
+          source={require('../assets/gun/gun.png')}
+          style={styles.GunImage}
         />
       )}
     </View>
   );
 };
 
-interface BulletEntityParams {
+interface GunEntityParams {
   world: Matter.World;
   pos: {x: number; y: number};
   size: {width: number; height: number};
@@ -65,26 +64,23 @@ export default ({
   size,
   moving,
   directionAngle,
-}: BulletEntityParams) => {
-  const initialBullet = Matter.Bodies.rectangle(
+}: GunEntityParams) => {
+  const initialGun = Matter.Bodies.rectangle(
     pos.x,
     pos.y,
     size.width,
     size.height,
     {
-      label: 'Bullet',
+      label: 'Gun',
+      isStatic: true,
     },
   );
-  Matter.World.add(world, initialBullet);
+  Matter.World.add(world, initialGun);
 
   return {
-    body: initialBullet,
+    body: initialGun,
     renderer: (
-      <Bullet
-        moving={moving}
-        directionAngle={directionAngle}
-        body={initialBullet}
-      />
+      <Gun moving={moving} directionAngle={directionAngle} body={initialGun} />
     ),
   };
 };
