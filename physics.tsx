@@ -2,7 +2,7 @@ import Matter from 'matter-js';
 
 interface Entities {
   Zombies: {body: any; color: string; dead: boolean};
-  Bullet: {body: any; color: string};
+  Bullet: {body: any; color: string; moving: boolean; directionAngle: number};
   FloorBottom: {body: any; color: string};
   FloorTop: {body: any; color: string};
   FloorRight: {body: any; color: string};
@@ -31,16 +31,16 @@ let currentBounce = 0;
 let hitZombies = [];
 
 let isFirstCall = true;
-function setTranslate(value: {x: number; y: number}) {
+function updateMovement(value: {x: number; y: number}, entities: Entities) {
   if (isFirstCall) {
-    // Do something with the argument for the first call
     translate = value;
     isFirstCall = false;
     currentBounce++;
-    // Set a timeout to reset isFirstCall after a delay
+    const angleRad = Math.atan2(value.y, value.x);
+    entities.Bullet.directionAngle = angleRad * (180 / Math.PI);
     setTimeout(() => {
       isFirstCall = true;
-    }, 100); // Adjust the delay as needed
+    }, 100);
   }
 }
 
@@ -52,6 +52,7 @@ const Physics = (
   touches
     .filter(t => t.type === 'press')
     .forEach(t => {
+      console.log(t);
       const angleRadians = Math.atan2(
         t.event.locationY - entities.Bullet.body.position.y,
         t.event.locationX - entities.Bullet.body.position.x,
@@ -60,6 +61,8 @@ const Physics = (
         x: Math.cos(angleRadians) * 7,
         y: Math.sin(angleRadians) * 7,
       };
+      entities.Bullet.directionAngle = angleRadians * (180 / Math.PI);
+      entities.Bullet.moving = true;
     });
   Matter.Events.on(engine, 'collisionStart', event => {
     event.pairs.forEach(pair => {
@@ -68,6 +71,7 @@ const Physics = (
         dispatch({type: 'win'});
         hitZombies.push(entities.Zombies?.body.label);
         entities.Zombies.dead = true;
+        entities.Bullet.moving = false;
       }
       if (
         bodyA === entities.Bullet?.body &&
@@ -78,24 +82,26 @@ const Physics = (
       ) {
         if (currentBounce === BOUNCES) {
           dispatch({type: 'game_over'});
+          entities.Bullet.moving = false;
         }
         let tempTranslate;
+        let angleRad = 0;
         switch (bodyB) {
           case entities.FloorTop?.body || entities.FloorBottom?.body:
             tempTranslate = translate;
-            setTranslate({x: tempTranslate.x, y: -tempTranslate.y});
+            updateMovement({x: tempTranslate.x, y: -tempTranslate.y}, entities);
             break;
           case entities.FloorBottom?.body:
             tempTranslate = translate;
-            setTranslate({x: tempTranslate.x, y: -tempTranslate.y});
+            updateMovement({x: tempTranslate.x, y: -tempTranslate.y}, entities);
             break;
           case entities.FloorLeft?.body || entities.FloorRight?.body:
             tempTranslate = translate;
-            setTranslate({x: -tempTranslate.x, y: tempTranslate.y});
+            updateMovement({x: -tempTranslate.x, y: tempTranslate.y}, entities);
             break;
           case entities.FloorRight?.body:
             tempTranslate = translate;
-            setTranslate({x: -tempTranslate.x, y: tempTranslate.y});
+            updateMovement({x: -tempTranslate.x, y: tempTranslate.y}, entities);
             break;
           default:
             break;

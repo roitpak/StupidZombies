@@ -52,8 +52,8 @@ const Zombies: React.FC<ZombiesProps> = ({body, dead}) => {
       position: 'absolute',
       left: xBody,
       top: yBody,
-      width: widthBody,
-      height: heightBody,
+      // width: widthBody,
+      // height: heightBody,
     },
     zombieAlive: {
       position: 'absolute',
@@ -101,6 +101,7 @@ export default ({world, pos, size, dead}: ZombiesEntityParams) => {
     {
       label: 'Zombies',
       isStatic: true,
+      isSensor: false,
     },
   );
   Matter.World.add(world, initialZombies);

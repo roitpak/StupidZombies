@@ -5,7 +5,6 @@ import heroImgs from '../assets/hero';
 
 interface HeroProps {
   body: Matter.Body;
-  color: string;
 }
 
 const Hero: React.FC<HeroProps> = (props: any) => {
@@ -15,11 +14,8 @@ const Hero: React.FC<HeroProps> = (props: any) => {
   const xBody = props.body.position.x - widthBody / 2;
   const yBody = props.body.position.y - heightBody / 2;
 
-  const color = props.color;
-
   const styles = StyleSheet.create({
     container: {
-      backgroundColor: color || 'pink',
       position: 'absolute',
       left: xBody,
       top: yBody,
@@ -47,7 +43,7 @@ const Hero: React.FC<HeroProps> = (props: any) => {
   }, []);
 
   return (
-    <View style={[styles.container, {backgroundColor: color || 'pink'}]}>
+    <View style={styles.container}>
       <Image source={heroImgs[currentIndex]} style={styles.image} />
     </View>
   );
@@ -55,24 +51,22 @@ const Hero: React.FC<HeroProps> = (props: any) => {
 
 interface HeroEntityParams {
   world: Matter.World;
-  color: string;
   pos: {x: number; y: number};
   size: {width: number; height: number};
 }
 
-export default ({world, color, pos, size}: HeroEntityParams) => {
+export default ({world, pos, size}: HeroEntityParams) => {
   const initialHero = Matter.Bodies.rectangle(
     pos.x,
     pos.y,
     size.width,
     size.height,
-    {label: 'Hero', isStatic: true},
+    {label: 'Hero', isStatic: true, isSensor: false},
   );
   Matter.World.add(world, initialHero);
 
   return {
     body: initialHero,
-    color,
-    renderer: <Hero body={initialHero} color={color} />,
+    renderer: <Hero body={initialHero} />,
   };
 };

@@ -1,41 +1,71 @@
 import Matter from 'matter-js';
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {Image, StyleSheet, View} from 'react-native';
 
 interface BulletProps {
   body: Matter.Body;
-  color: string;
+  moving: boolean;
+  directionAngle: number;
 }
 
-const Bullet: React.FC<BulletProps> = (props: any) => {
-  const widthBody = props.body.bounds.max.x - props.body.bounds.min.x;
-  const heightBody = props.body.bounds.max.y - props.body.bounds.min.y;
+const Bullet: React.FC<BulletProps> = ({
+  body,
+  moving = false,
+  directionAngle,
+}: BulletProps) => {
+  const widthBody = body.bounds.max.x - body.bounds.min.x;
+  const heightBody = body.bounds.max.y - body.bounds.min.y;
 
-  const xBody = props.body.position.x - widthBody / 2;
-  const yBody = props.body.position.y - heightBody / 2;
+  const xBody = body.position.x - widthBody / 2;
+  const yBody = body.position.y - heightBody / 2;
 
   const styles = StyleSheet.create({
     container: {
-      backgroundColor: props.color || 'green',
       position: 'absolute',
       left: xBody,
       top: yBody,
       width: widthBody,
       height: heightBody,
     },
+    bulletImage: {
+      height: 25,
+      width: 25,
+      resizeMode: 'contain',
+      position: 'absolute',
+      top: -25 / 2,
+      right: -25 / 2,
+      transform: [{rotate: `${directionAngle}deg`}],
+    },
   });
 
-  return <View style={styles.container} />;
+  return (
+    <View style={styles.container}>
+      {/* {console.log(directionAngle)} */}
+      {moving && (
+        <Image
+          source={require('../assets/gun/bullet.png')}
+          style={styles.bulletImage}
+        />
+      )}
+    </View>
+  );
 };
 
 interface BulletEntityParams {
   world: Matter.World;
-  color: string;
   pos: {x: number; y: number};
   size: {width: number; height: number};
+  moving: boolean;
+  directionAngle: number;
 }
 
-export default ({world, color, pos, size}: BulletEntityParams) => {
+export default ({
+  world,
+  pos,
+  size,
+  moving,
+  directionAngle,
+}: BulletEntityParams) => {
   const initialBullet = Matter.Bodies.rectangle(
     pos.x,
     pos.y,
@@ -49,7 +79,12 @@ export default ({world, color, pos, size}: BulletEntityParams) => {
 
   return {
     body: initialBullet,
-    color,
-    renderer: <Bullet body={initialBullet} color={color} />,
+    renderer: (
+      <Bullet
+        moving={moving}
+        directionAngle={directionAngle}
+        body={initialBullet}
+      />
+    ),
   };
 };

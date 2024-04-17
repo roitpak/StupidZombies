@@ -17,7 +17,6 @@ const entities = () => {
 
     Hero: Hero({
       world: world,
-      color: 'green',
       pos: {x: 70, y: 320},
       size: {height: 100, width: 1},
     }),
