@@ -62,6 +62,9 @@ export default ({world, pos, size, moving}: AimEntityParams) => {
       label: 'Aim',
       isStatic: true,
       isSensor: false,
+      collisionFilter: {
+        mask: ~0x0002,
+      },
     },
   );
   Matter.World.add(world, initialAim);

@@ -1,8 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, StatusBar, Modal, Text, View} from 'react-native';
 import {GameEngine} from 'react-native-game-engine';
-import entities from '../Entities';
 import Physics from '../physics';
+import {Entities, PhysicsProps} from '../types/Types';
+import entitiesGenerator from '../Systems/entitiesGenerator';
+import {levels} from '../levels';
 
 export default function GameScreen(): JSX.Element {
   const [running, setRunning] = useState(false);
@@ -25,8 +27,11 @@ export default function GameScreen(): JSX.Element {
     <GameEngine
       ref={(ref: GameEngine) => setGameEngine(ref)}
       style={styles.container}
-      entities={entities()}
-      systems={[Physics]}
+      entities={entitiesGenerator(levels[0])}
+      systems={[
+        (gameEntities: Entities, physicsProps: PhysicsProps) =>
+          Physics(gameEntities, physicsProps, {data: 'This is a demodata'}),
+      ]}
       onEvent={(e: Event) => {
         switch (e.type) {
           case 'game_over':

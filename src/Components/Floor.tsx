@@ -41,7 +41,13 @@ export default ({world, color, pos, size}: FloorEntityParams) => {
     pos.y,
     size.width,
     size.height,
-    {label: 'Floor', isStatic: true},
+    {
+      label: 'Floor',
+      isStatic: true,
+      collisionFilter: {
+        category: 0x0002,
+      },
+    },
   );
   Matter.World.add(world, initialFloor);
 

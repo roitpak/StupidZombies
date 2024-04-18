@@ -3,6 +3,8 @@ import {Level} from './types/Types';
 
 export const levels: [Level] = [
   {
+    bounces: 5,
+    bullets: 5,
     hero: {
       pos: {
         x: 70,

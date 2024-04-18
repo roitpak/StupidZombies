@@ -72,6 +72,9 @@ export default ({
     size.height,
     {
       label: 'Bullet',
+      collisionFilter: {
+        category: 0x0002,
+      },
     },
   );
   Matter.World.add(world, initialBullet);

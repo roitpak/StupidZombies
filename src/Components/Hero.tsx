@@ -59,7 +59,13 @@ export default ({world, pos, size}: HeroEntityParams) => {
     pos.y,
     size.width,
     size.height,
-    {label: 'Hero', isStatic: true, isSensor: false},
+    {
+      label: 'Hero',
+      isStatic: true,
+      collisionFilter: {
+        mask: ~0x0002,
+      },
+    },
   );
   Matter.World.add(world, initialHero);
 

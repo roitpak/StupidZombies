@@ -24,8 +24,6 @@ const Gun: React.FC<GunProps> = ({
       position: 'absolute',
       left: xBody,
       top: yBody,
-      width: widthBody,
-      height: heightBody,
     },
     GunImage: {
       height: heightBody,
@@ -73,6 +71,9 @@ export default ({
     {
       label: 'Gun',
       isStatic: true,
+      collisionFilter: {
+        mask: ~0x0002,
+      },
     },
   );
   Matter.World.add(world, initialGun);

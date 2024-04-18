@@ -1,35 +1,35 @@
 import Matter from 'matter-js';
-import {Entities, PhysicsProps} from './types/Types';
-
-const BOUNCES = 5;
-
-let translate = {x: 0, y: 0};
-let currentBounce = -1;
-let hitZombies = [];
-
-let isFirstCall = true;
-
-function updateMovement(value: {x: number; y: number}, entities: Entities) {
-  if (isFirstCall) {
-    translate = value;
-    isFirstCall = false;
-    currentBounce++;
-    const angleRad = Math.atan2(value.y, value.x);
-    entities.Bullet.directionAngle = angleRad * (180 / Math.PI);
-    entities.Bullet.moving = true;
-    setTimeout(() => {
-      isFirstCall = true;
-    }, 20);
-  }
-}
+import {Entities, Level, PhysicsProps} from '../types/Types';
 
 const Physics = (
   entities: Entities,
   {touches, time, dispatch}: PhysicsProps,
-  data: any,
+  level: Level,
 ): Entities => {
-  // console.log('Data--> passed', data);
   let engine = entities.physics.engine;
+
+  const BOUNCES = 5;
+
+  let translate = {x: 0, y: 0};
+  let currentBounce = 0;
+  let hitZombies = [];
+
+  let isFirstCall = true;
+
+  function updateMovement(value: {x: number; y: number}) {
+    if (isFirstCall) {
+      translate = value;
+      isFirstCall = false;
+      currentBounce++;
+      const angleRad = Math.atan2(value.y, value.x);
+      entities.Bullet.directionAngle = angleRad * (180 / Math.PI);
+      entities.Bullet.moving = true;
+      setTimeout(() => {
+        isFirstCall = true;
+      }, 100);
+    }
+  }
+
   touches
     .filter(t => t.type === 'end')
     .forEach(t => {
@@ -37,13 +37,10 @@ const Physics = (
         t.event.locationY - entities.Bullet.body.position.y,
         t.event.locationX - entities.Bullet.body.position.x,
       );
-      updateMovement(
-        {
-          x: Math.cos(angleRadians) * 7,
-          y: Math.sin(angleRadians) * 7,
-        },
-        entities,
-      );
+      updateMovement({
+        x: Math.cos(angleRadians) * 7,
+        y: Math.sin(angleRadians) * 7,
+      });
       entities.Gun.moving = false;
       entities.Aim.moving = false;
     });
@@ -68,6 +65,8 @@ const Physics = (
         t.event.locationX - entities.Bullet.body.position.x,
       );
       entities.Gun.directionAngle = angleRadians * (180 / Math.PI);
+      entities.Gun.moving = true;
+      entities.Aim.moving = true;
       entities.Aim.body.position.y = t.event.locationY;
       entities.Aim.body.position.x = t.event.locationX;
     });
@@ -95,19 +94,19 @@ const Physics = (
         switch (bodyB) {
           case entities.FloorTop?.body || entities.FloorBottom?.body:
             tempTranslate = translate;
-            updateMovement({x: tempTranslate.x, y: -tempTranslate.y}, entities);
+            updateMovement({x: tempTranslate.x, y: -tempTranslate.y});
             break;
           case entities.FloorBottom?.body:
             tempTranslate = translate;
-            updateMovement({x: tempTranslate.x, y: -tempTranslate.y}, entities);
+            updateMovement({x: tempTranslate.x, y: -tempTranslate.y});
             break;
           case entities.FloorLeft?.body || entities.FloorRight?.body:
             tempTranslate = translate;
-            updateMovement({x: -tempTranslate.x, y: tempTranslate.y}, entities);
+            updateMovement({x: -tempTranslate.x, y: tempTranslate.y});
             break;
           case entities.FloorRight?.body:
             tempTranslate = translate;
-            updateMovement({x: -tempTranslate.x, y: tempTranslate.y}, entities);
+            updateMovement({x: -tempTranslate.x, y: tempTranslate.y});
             break;
           default:
             break;
@@ -115,8 +114,6 @@ const Physics = (
       }
     });
   });
-
-  console.log(currentBounce);
   Matter.Engine.update(engine, time.delta);
   Matter.Body.translate(entities.Bullet.body, translate);
 

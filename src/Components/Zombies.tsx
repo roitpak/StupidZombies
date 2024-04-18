@@ -100,6 +100,9 @@ export default ({world, pos, size, dead}: ZombiesEntityParams) => {
       label: 'Zombies',
       isStatic: true,
       isSensor: false,
+      collisionFilter: {
+        category: 0x0002,
+      },
     },
   );
   Matter.World.add(world, initialZombies);
