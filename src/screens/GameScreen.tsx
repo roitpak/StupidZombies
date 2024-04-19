@@ -1,19 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, StatusBar, Modal, Text, View} from 'react-native';
 import {GameEngine} from 'react-native-game-engine';
-import Physics from '../physics';
-import {Entities, PhysicsProps} from '../types/Types';
-import entitiesGenerator from '../Systems/entitiesGenerator';
-import {levels} from '../levels';
+import levels from '../levels/index';
 
-export default function GameScreen(): JSX.Element {
+export default function GameScreen({route}): JSX.Element {
   const [running, setRunning] = useState(false);
   const [win, setWin] = useState(0);
   const [gameEngine, setGameEngine] = useState<GameEngine | null>(null);
   useEffect(() => {
     setRunning(true);
   }, []);
-
   const returnModalText = () => {
     if (win === -1) {
       return 'Game over!';
@@ -27,11 +23,13 @@ export default function GameScreen(): JSX.Element {
     <GameEngine
       ref={(ref: GameEngine) => setGameEngine(ref)}
       style={styles.container}
-      entities={entitiesGenerator(levels[0])}
-      systems={[
-        (gameEntities: Entities, physicsProps: PhysicsProps) =>
-          Physics(gameEntities, physicsProps, {data: 'This is a demodata'}),
-      ]}
+      // systems={[
+      //   (gameEntities: Entities, physicsProps: PhysicsProps) =>
+      //     physicsGenerator(gameEntities, physicsProps, levels[0]),
+      // ]}
+      // entities={entitiesGenerator(levels[0])}
+      entities={levels[route.params.index].entities()}
+      systems={[levels[route.params.index].physics]}
       onEvent={(e: Event) => {
         switch (e.type) {
           case 'game_over':

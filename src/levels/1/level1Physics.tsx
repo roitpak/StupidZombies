@@ -1,5 +1,5 @@
 import Matter from 'matter-js';
-import {Entities, PhysicsProps} from './types/Types';
+import {Entities, PhysicsProps} from '../../types/Types';
 
 const BOUNCES = 5;
 
@@ -23,12 +23,10 @@ function updateMovement(value: {x: number; y: number}, entities: Entities) {
   }
 }
 
-const Physics = (
+const level1Physics = (
   entities: Entities,
   {touches, time, dispatch}: PhysicsProps,
-  data: any,
 ): Entities => {
-  // console.log('Data--> passed', data);
   let engine = entities.physics.engine;
   touches
     .filter(t => t.type === 'end')
@@ -116,11 +114,10 @@ const Physics = (
     });
   });
 
-  console.log(currentBounce);
   Matter.Engine.update(engine, time.delta);
   Matter.Body.translate(entities.Bullet.body, translate);
 
   return entities;
 };
 
-export default Physics;
+export default level1Physics;

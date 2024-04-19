@@ -1,7 +1,7 @@
-import Constants from './helpers/Constants';
-import {Level} from './types/Types';
+import Constants from '../helpers/Constants';
+import {Level} from '../types/Types';
 
-export const levels: [Level] = [
+export const levelData: [Level] = [
   {
     bounces: 5,
     bullets: 5,

@@ -1,60 +1,54 @@
 import Matter from 'matter-js';
-import {Entities, Level, PhysicsProps} from '../types/Types';
+import {Entities, PhysicsProps} from '../types/Types';
 
-const physicsGenerator = (
+const BOUNCES = 5;
+
+let translate = {x: 0, y: 0};
+let currentBounce = -1;
+let hitZombies = [];
+
+let isFirstCall = true;
+
+function updateMovement(value: {x: number; y: number}, entities: Entities) {
+  if (isFirstCall) {
+    translate = value;
+    isFirstCall = false;
+    currentBounce++;
+    const angleRad = Math.atan2(value.y, value.x);
+    entities.Bullet.directionAngle = angleRad * (180 / Math.PI);
+    entities.Bullet.moving = true;
+    setTimeout(() => {
+      isFirstCall = true;
+    }, 20);
+  }
+}
+
+const Physics = (
   entities: Entities,
   {touches, time, dispatch}: PhysicsProps,
-  level: Level,
 ): Entities => {
+  console.log(entities);
   let engine = entities.physics.engine;
-  const BOUNCES = level.bounces;
-
-  let translate = {x: 0, y: 0};
-  let currentBounce = 0;
-  let hitZombies = [];
-  let bulletRunning = false;
-  let remainingBullets = level.bullets;
-  let isFirstCall = true; //flag because collision called multiple times
-  function moveBullet(value: {x: number; y: number}) {
-    if (isFirstCall) {
-      bulletRunning = true;
-      translate = value;
-      isFirstCall = false;
-      currentBounce++;
-      const angleRad = Math.atan2(value.y, value.x);
-      entities.Bullet.directionAngle = angleRad * (180 / Math.PI);
-      entities.Bullet.moving = true;
-      setTimeout(() => {
-        isFirstCall = true;
-      }, 100);
-    }
-  }
-
   touches
     .filter(t => t.type === 'end')
     .forEach(t => {
-      if (bulletRunning) {
-        return;
-      }
-      remainingBullets--;
       const angleRadians = Math.atan2(
         t.event.locationY - entities.Bullet.body.position.y,
         t.event.locationX - entities.Bullet.body.position.x,
       );
-      moveBullet({
-        x: Math.cos(angleRadians) * 7,
-        y: Math.sin(angleRadians) * 7,
-      });
+      updateMovement(
+        {
+          x: Math.cos(angleRadians) * 7,
+          y: Math.sin(angleRadians) * 7,
+        },
+        entities,
+      );
       entities.Gun.moving = false;
       entities.Aim.moving = false;
     });
-
   touches
     .filter(t => t.type === 'start')
     .forEach(t => {
-      if (bulletRunning) {
-        return;
-      }
       const angleRadians = Math.atan2(
         t.event.locationY - entities.Bullet.body.position.y,
         t.event.locationX - entities.Bullet.body.position.x,
@@ -65,24 +59,17 @@ const physicsGenerator = (
       entities.Aim.body.position.y = t.event.locationY;
       entities.Aim.body.position.x = t.event.locationX;
     });
-
   touches
     .filter(t => t.type === 'move')
     .forEach(t => {
-      if (bulletRunning) {
-        return;
-      }
       const angleRadians = Math.atan2(
         t.event.locationY - entities.Bullet.body.position.y,
         t.event.locationX - entities.Bullet.body.position.x,
       );
       entities.Gun.directionAngle = angleRadians * (180 / Math.PI);
-      entities.Gun.moving = true;
-      entities.Aim.moving = true;
       entities.Aim.body.position.y = t.event.locationY;
       entities.Aim.body.position.x = t.event.locationX;
     });
-
   Matter.Events.on(engine, 'collisionStart', event => {
     event.pairs.forEach(pair => {
       const {bodyA, bodyB} = pair;
@@ -91,7 +78,6 @@ const physicsGenerator = (
         hitZombies.push(entities.Zombies?.body.label);
         entities.Zombies.dead = true;
         entities.Bullet.moving = false;
-        bulletRunning = false;
       }
       if (
         bodyA === entities.Bullet?.body &&
@@ -101,29 +87,26 @@ const physicsGenerator = (
           bodyB === entities.FloorRight?.body)
       ) {
         if (currentBounce === BOUNCES) {
-          if (remainingBullets === 0) {
-            dispatch({type: 'game_over'});
-            entities.Bullet.moving = false;
-          }
-          bulletRunning = false;
+          dispatch({type: 'game_over'});
+          entities.Bullet.moving = false;
         }
         let tempTranslate;
         switch (bodyB) {
           case entities.FloorTop?.body || entities.FloorBottom?.body:
             tempTranslate = translate;
-            moveBullet({x: tempTranslate.x, y: -tempTranslate.y});
+            updateMovement({x: tempTranslate.x, y: -tempTranslate.y}, entities);
             break;
           case entities.FloorBottom?.body:
             tempTranslate = translate;
-            moveBullet({x: tempTranslate.x, y: -tempTranslate.y});
+            updateMovement({x: tempTranslate.x, y: -tempTranslate.y}, entities);
             break;
           case entities.FloorLeft?.body || entities.FloorRight?.body:
             tempTranslate = translate;
-            moveBullet({x: -tempTranslate.x, y: tempTranslate.y});
+            updateMovement({x: -tempTranslate.x, y: tempTranslate.y}, entities);
             break;
           case entities.FloorRight?.body:
             tempTranslate = translate;
-            moveBullet({x: -tempTranslate.x, y: tempTranslate.y});
+            updateMovement({x: -tempTranslate.x, y: tempTranslate.y}, entities);
             break;
           default:
             break;
@@ -138,4 +121,4 @@ const physicsGenerator = (
   return entities;
 };
 
-export default physicsGenerator;
+export default Physics;
