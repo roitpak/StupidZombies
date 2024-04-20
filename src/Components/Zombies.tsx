@@ -64,8 +64,8 @@ const Zombies: React.FC<ZombiesProps> = ({body, dead}) => {
     zombieDie: {
       position: 'absolute',
       top: 0,
-      left: -100 / 2,
-      width: 120,
+      left: -widthBody / 2,
+      width: widthBody * 2,
       height: heightBody,
       resizeMode: 'contain',
     },

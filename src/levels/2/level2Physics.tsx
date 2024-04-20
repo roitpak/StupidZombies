@@ -1,6 +1,22 @@
 import Matter from 'matter-js';
 import {PhysicsProps} from '../../types/Types';
 import {Entities} from './types';
+import { responsive } from '../../helpers/Constants';
+
+var Sound = require('react-native-sound');
+Sound.setCategory('Playback');
+var fire = new Sound('fire.mp3', Sound.MAIN_BUNDLE, error => {
+  if (error) {
+    console.log('failed to load the sound', error);
+    return;
+  }
+});
+var impact = new Sound('impact.mp3', Sound.MAIN_BUNDLE, error => {
+  if (error) {
+    console.log('failed to load the sound', error);
+    return;
+  }
+});
 
 // TODO there values stays persistent even when going back
 
@@ -29,6 +45,17 @@ function updateMovement(value: {x: number; y: number}, entities: Entities) {
   }
 }
 
+function resetValues(entities: Entities) {
+  translate = {x: 0, y: 0};
+  currentBounce = -1;
+  hitZombies = [];
+
+  isFirstCall = true;
+  bulletMoving = false;
+  entities.Bullet.body.x = responsive(70);
+  entities.Bullet.body.y = responsive(70);
+}
+
 const level2Physics = (
   entities: Entities,
   {touches, time, dispatch}: PhysicsProps,
@@ -42,6 +69,7 @@ const level2Physics = (
       if (bulletMoving) {
         return;
       }
+      fire.play();
       const angleRadians = Math.atan2(
         t.event.locationY - entities.Bullet.body.position.y,
         t.event.locationX - entities.Bullet.body.position.x,
@@ -101,6 +129,7 @@ const level2Physics = (
 
       if (hitZombies.length === TOTAL_ZOMBIES) {
         dispatch({type: 'win'});
+        resetValues(entities);
       }
 
       let tempTranslate;
@@ -112,10 +141,12 @@ const level2Physics = (
           bodyB === entities.FloorLeft?.body ||
           bodyB === entities.FloorRight?.body)
       ) {
+        impact.play();
         if (currentBounce === BOUNCES) {
           bulletMoving = false;
           dispatch({type: 'game_over'});
           entities.Bullet.moving = false;
+          resetValues(entities);
         }
         switch (bodyB) {
           case entities.FloorTop?.body:
@@ -143,6 +174,7 @@ const level2Physics = (
         bodyA === entities.Bullet?.body &&
         bodyB === entities.FloorMid?.body
       ) {
+        impact.play();
         const {bodyA, bodyB} = pair;
 
         const collisionPoint = {
