@@ -20,9 +20,12 @@ const Zombies: React.FC<ZombiesProps> = ({body, dead}) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentImageIndex(
-        prevIndex => prevIndex + (1 % zombiesAppearImgs.length),
-      );
+      setCurrentImageIndex(prevIndex => {
+        if (prevIndex === zombiesAppearImgs.length - 1) {
+          return prevIndex;
+        }
+        return prevIndex + (1 % zombiesAppearImgs.length);
+      });
     }, 100);
 
     return () => clearInterval(interval);
@@ -34,9 +37,12 @@ const Zombies: React.FC<ZombiesProps> = ({body, dead}) => {
     if (dead) {
       setCurrentImageIndex(0);
       interval = setInterval(() => {
-        setCurrentImageIndex(
-          prevIndex => prevIndex + (1 % zombieDieImgs.length),
-        );
+        setCurrentImageIndex(prevIndex => {
+          if (prevIndex === zombieDieImgs.length - 1) {
+            return prevIndex;
+          }
+          return prevIndex + (1 % zombieDieImgs.length);
+        });
       }, 100);
     }
 
