@@ -7,7 +7,7 @@ import Zombies from '../../Components/Zombies';
 import Floor from '../../Components/Floor';
 import Constants, {responsive} from '../../helpers/Constants';
 
-const level1Entities = () => {
+const level2Entities = () => {
   let engine = Matter.Engine.create({enableSleeping: false});
 
   let world = engine.world;
@@ -44,8 +44,16 @@ const level1Entities = () => {
     }),
     Zombies: Zombies({
       world: world,
-      pos: {x: responsive(550), y: responsive(232)},
-      size: {height: responsive(70), width: responsive(70)},
+      pos: {x: responsive(550), y: responsive(235)},
+      size: {height: responsive(70), width: responsive(50)},
+    }),
+    Zombies2: Zombies({
+      world: world,
+      pos: {
+        x: Constants.MAX_WIDTH / 2,
+        y: Constants.MAX_HEIGHT / 2 - responsive(35), // about floor width
+      },
+      size: {height: responsive(70), width: responsive(50)},
     }),
     FloorBottom: Floor({
       world: world,
@@ -71,7 +79,13 @@ const level1Entities = () => {
       pos: {x: Constants.MAX_WIDTH / 2, y: 0},
       size: {height: responsive(38), width: Constants.MAX_WIDTH},
     }),
+    FloorMid: Floor({
+      world: world,
+      color: 'black',
+      pos: {x: Constants.MAX_WIDTH / 2, y: Constants.MAX_HEIGHT / 2},
+      size: {height: responsive(5), width: Constants.MAX_WIDTH / 3},
+    }),
   };
 };
 
-export default level1Entities;
+export default level2Entities;

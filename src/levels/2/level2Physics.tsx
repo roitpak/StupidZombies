@@ -1,14 +1,18 @@
 import Matter from 'matter-js';
-import {Entities, PhysicsProps} from '../../types/Types';
+import {PhysicsProps} from '../../types/Types';
+import {Entities} from './types';
+
+// TODO there values stays persistent even when going back
 
 const BOUNCES = 5;
+const TOTAL_ZOMBIES = 2;
 
 let translate = {x: 0, y: 0};
 let currentBounce = -1;
-let hitZombies = [];
+let hitZombies: [string] = [];
+let bulletMoving = false;
 
 let isFirstCall = true;
-let bulletMoving = false;
 
 function updateMovement(value: {x: number; y: number}, entities: Entities) {
   if (isFirstCall) {
@@ -25,7 +29,7 @@ function updateMovement(value: {x: number; y: number}, entities: Entities) {
   }
 }
 
-const level1Physics = (
+const level2Physics = (
   entities: Entities,
   {touches, time, dispatch}: PhysicsProps,
 ): Entities => {
@@ -78,11 +82,29 @@ const level1Physics = (
     event.pairs.forEach(pair => {
       const {bodyA, bodyB} = pair;
       if (bodyA === entities.Bullet?.body && bodyB === entities.Zombies?.body) {
-        dispatch({type: 'win'});
-        hitZombies.push(entities.Zombies?.body.label);
+        Matter.Body.set(entities.Zombies.body, 'collisionFilter', {
+          mask: ~0x0002,
+        }); // bullet will continue its path
+        !hitZombies.includes('Zombie1') && hitZombies.push('Zombie1');
         entities.Zombies.dead = true;
-        entities.Bullet.moving = false;
       }
+      if (
+        bodyA === entities.Bullet?.body &&
+        bodyB === entities.Zombies2?.body
+      ) {
+        Matter.Body.set(entities.Zombies2.body, 'collisionFilter', {
+          mask: ~0x0002,
+        }); // bullet will continue its path
+        !hitZombies.includes('Zombie2') && hitZombies.push('Zombie2');
+        entities.Zombies2.dead = true;
+      }
+
+      if (hitZombies.length === TOTAL_ZOMBIES) {
+        dispatch({type: 'win'});
+      }
+
+      let tempTranslate;
+
       if (
         bodyA === entities.Bullet?.body &&
         (bodyB === entities.FloorTop?.body ||
@@ -95,9 +117,8 @@ const level1Physics = (
           dispatch({type: 'game_over'});
           entities.Bullet.moving = false;
         }
-        let tempTranslate;
         switch (bodyB) {
-          case entities.FloorTop?.body || entities.FloorBottom?.body:
+          case entities.FloorTop?.body:
             tempTranslate = translate;
             updateMovement({x: tempTranslate.x, y: -tempTranslate.y}, entities);
             break;
@@ -105,7 +126,7 @@ const level1Physics = (
             tempTranslate = translate;
             updateMovement({x: tempTranslate.x, y: -tempTranslate.y}, entities);
             break;
-          case entities.FloorLeft?.body || entities.FloorRight?.body:
+          case entities.FloorLeft?.body:
             tempTranslate = translate;
             updateMovement({x: -tempTranslate.x, y: tempTranslate.y}, entities);
             break;
@@ -117,13 +138,40 @@ const level1Physics = (
             break;
         }
       }
+
+      if (
+        bodyA === entities.Bullet?.body &&
+        bodyB === entities.FloorMid?.body
+      ) {
+        const {bodyA, bodyB} = pair;
+
+        const collisionPoint = {
+          x: (bodyA.position.x + bodyB.position.x) / 2,
+          y: (bodyA.position.y + bodyB.position.y) / 2,
+        };
+
+        // // 351
+        // if (collisionPoint.x <= bodyB.bounds.min.x) {
+        //   console.log('left');
+        // } else if (collisionPoint.x >= bodyB.bounds.max.x) {
+        //   // 501
+        //   console.log('right');
+        // }
+
+        if (collisionPoint.y <= bodyB.bounds.min.y + 2) {
+          // +2 added sometimes inside bounds
+          tempTranslate = translate;
+          updateMovement({x: tempTranslate.x, y: -tempTranslate.y}, entities);
+        } else if (collisionPoint.y >= bodyB.bounds.max.y + 1) {
+          tempTranslate = translate;
+          updateMovement({x: tempTranslate.x, y: -tempTranslate.y}, entities);
+        }
+      }
     });
   });
-
   Matter.Engine.update(engine, time.delta);
   Matter.Body.translate(entities.Bullet.body, translate);
-
   return entities;
 };
 
-export default level1Physics;
+export default level2Physics;

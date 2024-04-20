@@ -39,7 +39,6 @@ const Bullet: React.FC<BulletProps> = ({
 
   return (
     <View style={styles.container}>
-      {/* {console.log(directionAngle)} */}
       {moving && (
         <Image
           source={require('../assets/gun/bullet.png')}
